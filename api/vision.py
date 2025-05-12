@@ -1,19 +1,50 @@
-# vision.py
 from google.cloud import vision
-from google.oauth2 import service_account
+import io
 
-# 인증 정보로 Vision API 클라이언트 생성
-credentials = service_account.Credentials.from_service_account_file("service_account.json")
-client = vision.ImageAnnotatorClient(credentials=credentials)
+def is_probably_title(text: str) -> bool:
+    if not text:
+        return False
+    if text.lower().startswith("by "):
+        return False
+    if any(word in text.lower() for word in ["artist", "painting", "artwork", "gallery"]):
+        return False
+    if len(text) > 50:
+        return False
+    return True
 
-def get_best_guess_label(image_bytes: bytes) -> str | None:
-    image = vision.Image(content=image_bytes)
+def get_best_guess_label(image_data: bytes):
+    client = vision.ImageAnnotatorClient()
+    image = vision.Image(content=image_data)
+
     response = client.web_detection(image=image)
+    web_detection = response.web_detection
 
-    if response.error.message:
-        raise Exception(f"이미지 인식 실패: {response.error.message}")
+    if web_detection.best_guess_labels:
+        best_guess = web_detection.best_guess_labels[0].label.lower()
+    else:
+        best_guess = ""
 
-    best_guess_labels = response.web_detection.best_guess_labels
-    if best_guess_labels:
-        return best_guess_labels[0].label
-    return None
+    entities = web_detection.web_entities if web_detection.web_entities else []
+    title_candidates = []
+    for entity in entities:
+        desc = entity.description.strip()
+        if desc and is_probably_title(desc):
+            title_candidates.append((desc, entity.score))
+
+    title_candidates.sort(key=lambda x: x[1], reverse=True)
+
+    page_titles = []
+    if web_detection.pages_with_matching_images:
+        for page in web_detection.pages_with_matching_images:
+            if page.page_title:
+                page_titles.append(page.page_title.strip())
+
+    if title_candidates:
+        return title_candidates[0][0]
+
+    for title in page_titles:
+        if is_probably_title(title):
+            return title
+
+    return best_guess if is_probably_title(best_guess) else None
+
