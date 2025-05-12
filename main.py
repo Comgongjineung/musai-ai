@@ -9,8 +9,10 @@ async def web_detection(file: UploadFile = File(...)):
     try:
         label = get_best_guess_label(image_data)
         if label:
-            return {"best_guess_label": label}
+            return {
+                "artwork_name": label
+            }
         else:
-            return {"message": "No best guess label found"}
+            return {"message": "작품 인식에 실패하였습니다."}
     except Exception as e:
         return {"error": str(e)}
