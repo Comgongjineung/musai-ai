@@ -2,31 +2,52 @@ import os
 from dotenv import load_dotenv
 from PIL import Image
 import io
+import re
 import google.generativeai as genai
 
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=api_key)
 
-# 모델 선택 (현재 무료로 가능한 gemini-1.5-flash)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-def get_artwork_title_from_bytes(image_bytes: bytes, best_guess: str = "") -> str:
+def get_artwork_title_from_bytes(image_bytes: bytes, best_guess: str = "") -> dict:
     try:
-        # 이미지 전처리
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-        # Vision API에서 받은 best_guess 후보를 프롬프트에 함께 사용
         prompt = (
-            f"지금까지의 프롬프트나 입력값 출력값은 전부 잊고 새로 시작하자"
-            f"이 작품은 '{best_guess}'라는 이름으로 추정되고 있어."
-            f"이 작품의 이름을 알고 싶어."
-            f"정확한 한국어 제목을 알려줘. 출력값은 무조건 있어야해."
+            f"이 작품은 '{best_guess}'라는 이름으로 Vision API에서 추정된 이미지입니다.\n"
+            f"이 작품의 정식 정보를 아래 형식에 맞춰 한국어로 알려주세요.\n"
+            f"특히 '작품 해설'은 반드시 **최소 10문장 이상**, 구체적이고 서술적인 문단으로 작성해주세요.\n\n"
+            f"작품 이름 :\n"
+            f"작가명 :\n"
+            f"제작 년도 :\n"
+            f"예술사조 :\n"
+            f"작품 해설 :"
         )
 
         response = model.generate_content([prompt, image], stream=False)
+        result = response.text.strip()
 
-        return response.text.strip()
+        parsed = {
+            "title": _extract_field(result, r"작품\s*이름\s*:\s*(.*)"),
+            "artist": _extract_field(result, r"작가명\s*:\s*(.*)"),
+            "year": _extract_field(result, r"제작\s*년도\s*:\s*(.*)"),
+            "style": _extract_field(result, r"예술사조\s*:\s*(.*)"),
+            "description": _extract_description(result)
+        }
+
+        return parsed
 
     except Exception as e:
-        return f"[Gemini 오류]: {e}"
+        return {"error": f"[Gemini 오류]: {e}"}
+
+
+def _extract_field(text: str, pattern: str) -> str:
+    match = re.search(pattern, text)
+    return match.group(1).strip() if match else "정보 없음"
+
+
+def _extract_description(text: str) -> str:
+    match = re.search(r"작품\s*해설\s*:\s*(.*)", text, re.DOTALL)
+    return match.group(1).strip() if match else "설명 없음"

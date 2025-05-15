@@ -9,15 +9,12 @@ async def web_detection(file: UploadFile = File(...)):
     image_data = await file.read()
 
     try:
-        # Vision API로 best guess 추출
         label = get_best_guess_label(image_data)
-
-        # Gemini에 best guess를 프롬프트 힌트로 함께 전달
-        gemini_label = get_artwork_title_from_bytes(image_data, best_guess=label)
+        gemini_result = get_artwork_title_from_bytes(image_data, best_guess=label)
 
         return {
             "vision_result": label if label else "작품 인식 실패",
-            "gemini_result": gemini_label
+            "gemini_result": gemini_result
         }
 
     except Exception as e:
