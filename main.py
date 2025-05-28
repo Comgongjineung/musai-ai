@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 from fastapi import FastAPI, UploadFile, File
 from api.vision import get_best_guess_label
 from jemini import get_artwork_title_from_bytes
@@ -38,15 +37,3 @@ async def web_detection(file: UploadFile = File(...)):
                 "message": f"AI 서버 오류: {str(e)}"
             }
         )
-=======
-from fastapi import FastAPI
-from routes.vision_routes import router as vision_router
-from routes.jemi_routes import router as jemi_router
-from routes.tts_routes import router as tts_router
-
-app = FastAPI()
-
-app.include_router(vision_router, prefix="/web-detection")
-app.include_router(jemi_router, prefix="/jemi")
-app.include_router(tts_router, prefix="/tts")
->>>>>>> Stashed changes
