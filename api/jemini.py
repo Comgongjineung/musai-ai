@@ -44,6 +44,7 @@ def get_artwork_title_from_bytes(image_bytes: bytes, best_guess: str = "") -> di
             f"이 작품은 '{best_guess}'라는 이름으로 Vision API에서 추정된 이미지입니다.\n"
             f"이 작품의 정식 정보를 아래 형식에 맞춰 한국어로 알려주세요.\n"
             f"특히 '작품 해설'은 반드시 **최소 10문장 이상**, 구체적이고 서술적인 문단으로 작성해주세요.\n\n"
+            f"작품 이미지는 고화질 이미지를 검색해서 구해주세요\n"
             f"작품 이미지는 342 x 514 이 픽셀에 맞춰서 보내주세요 \n"
             f"작품 이미지: \n"
             f"작품 이름 :\n"
