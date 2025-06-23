@@ -1,7 +1,7 @@
 # 📄 routes/vision_routes.py
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from api.vision import get_best_guess_label
+from api.vision import get_best_guess_label, get_original_image_url
 from api.jemini import get_artwork_title_from_bytes
 
 router = APIRouter()
@@ -16,10 +16,12 @@ async def web_detection(file: UploadFile = File(...)):
 
         label = get_best_guess_label(image_data)
         gemini_result = get_artwork_title_from_bytes(image_data, best_guess=label)
+        image_url = get_original_image_url(image_data)  # 원본 이미지 URL 추출
 
         return {
             "vision_result": label if label else "작품 인식 실패",
-            "gemini_result": gemini_result
+            "gemini_result": gemini_result,
+            "original_image_url": image_url if image_url else "원본 이미지 없음"
         }
 
 

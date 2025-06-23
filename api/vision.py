@@ -12,6 +12,23 @@ def is_probably_title(text: str) -> bool:
         return False
     return True
 
+def get_original_image_url(image_data: bytes):
+    client = vision.ImageAnnotatorClient()
+    image = vision.Image(content=image_data)
+
+    response = client.web_detection(image=image)
+    web_detection = response.web_detection
+
+    # 완전히 일치하는 이미지 URL 추출
+    if web_detection.full_matching_images:
+        return web_detection.full_matching_images[0].url
+    # 부분적으로 일치하는 이미지 URL 추출
+    elif web_detection.partial_matching_images:
+        return web_detection.partial_matching_images[0].url
+    else:
+        return None
+
+
 def get_best_guess_label(image_data: bytes):
     client = vision.ImageAnnotatorClient()
     image = vision.Image(content=image_data)
