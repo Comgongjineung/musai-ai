@@ -98,7 +98,6 @@ def get_artwork_title_from_bytes(
             "year": _extract_field(result, r"제작\s*년도\s*:\s*(.*)"),
             "style": _extract_field(result, r"예술사조\s*:\s*(.*)"),
             "description": cleaned_description,
-            "level": level
         }
 
         return parsed
