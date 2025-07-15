@@ -5,7 +5,7 @@ from api.jemini import get_artwork_title_from_bytes
 
 router = APIRouter()
 
-@router.post("/web-detection/")
+@router.post("/")
 async def web_detection(
     file: UploadFile = File(...),
     level: str = Form("중"),  # ✅ level 폼 추가
