@@ -13,3 +13,4 @@ wheel
 typing-extensions
 pydantic>=1.10
 openai
+colorthief
