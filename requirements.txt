@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+python-dotenv
+Pillow
+google-cloud-vision
+google-generativeai
+python-multipart
+google-cloud-texttospeech
+mutagen
+requests
+setuptools
+wheel
+typing-extensions
+pydantic>=1.10
+openai
+colorthief
