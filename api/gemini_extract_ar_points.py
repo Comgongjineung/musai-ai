@@ -6,7 +6,7 @@ import google.generativeai as genai
 
 # API 초기화
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-2.5-flash")
+model = genai.GenerativeModel("gemini-2.0-flash-001")
 
 # 1: 작품 설명 생성
 def _describe_artwork(img_bytes: bytes) -> dict:
