@@ -15,4 +15,3 @@ pydantic>=1.10
 openai
 colorthief
 google-genai
-google-ai-gemini>=2.5
