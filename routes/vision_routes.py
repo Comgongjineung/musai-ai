@@ -17,7 +17,7 @@ async def web_detection(
 
         image_data = await file.read()
 
-        # 사용자가 best_guess를 직접 안 넣었으면 Vision API 결과로 보충
+        # 사용자가 best_guess를 직접 안 넣었으면 Vision API 결과 넣음
         label = best_guess or get_best_guess_label(image_data)
         gemini_result = get_artwork_title_from_bytes(image_data, best_guess=label, level=level)
         image_url = get_original_image_url(image_data)
