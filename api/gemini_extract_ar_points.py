@@ -4,11 +4,11 @@ from typing import List, Dict
 
 import google.generativeai as genai
 
-# ───────────────────────── API 초기화 ─────────────────────────
+# API 초기화
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
-# ───────────────────────── 1단계: 작품 설명 생성 ─────────────────────────
+# 1: 작품 설명 생성
 def _describe_artwork(img_bytes: bytes) -> dict:
     prompt = (
         "이 이미지는 하나의 예술 작품이다.\n"
@@ -24,7 +24,7 @@ def _describe_artwork(img_bytes: bytes) -> dict:
     )
     return json.loads(rsp.text)
 
-# ───────────────────────── 2단계: AR 포인트 추출 ─────────────────────────
+# 2: AR 포인트 추출
 def _points_from_description(img_bytes: bytes, description: str, max_pts: int) -> List[Dict]:
     prompt = (
         f'다음은 예술 작품에 대한 해설이다. 이 내용을 바탕으로, 이미지에서 AR 포인트로 시각화할 수 있는 핵심 상징 요소들을 최대 {max_pts}개 추출하라.\n'
@@ -40,7 +40,6 @@ def _points_from_description(img_bytes: bytes, description: str, max_pts: int) -
         generation_config={"response_mime_type": "application/json"},
     )
 
-    # 안전한 파싱
     try:
         pts = json.loads(rsp.text).get("points", [])
         pts = [pt for pt in pts if "x" in pt and "y" in pt and "description" in pt][:max_pts]
@@ -55,12 +54,12 @@ def _points_from_description(img_bytes: bytes, description: str, max_pts: int) -
 
     return pts
 
-# ───────────────────────── 외부 호출 함수 ─────────────────────────
+# 외부 호출 함수 
 def extract_points(img_bytes: bytes, max_points: int = 4) -> List[Dict]:
     context = _describe_artwork(img_bytes)
     return _points_from_description(img_bytes, context.get("description", ""), max_points)
 
-# ───────────────────────── CLI 테스트 ─────────────────────────
+# CLI 테스트
 if __name__ == "__main__":
     import sys, pathlib, pprint
 
