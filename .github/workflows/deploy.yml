@@ -32,10 +32,12 @@ jobs:
             docker build -t musai-ai .
 
             docker run -d \
-              --name musai-ai \
-              --network musai-network \
-              -p 8000:8000 \
-              -v /home/ec2-user/musai-ai/service_account.json:/app/service_account.json:ro \
-              -e GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json \
-              musai-ai
+            --name musai-ai \
+            --network musai-network \
+            -p 8000:8000 \
+            -v /home/ec2-user/musai-ai/service_account.json:/app/service_account.json:ro \
+            -e GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json \
+            -e GEMINI_MODEL_NAME=gemini-2.5 \
+            musai-ai
+
 
