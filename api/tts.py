@@ -38,5 +38,5 @@ def synthesize_text(text: str) -> bytes:
         return audio_data
         
     except Exception as e:
-        print(f"❌ Error during synthesis: {str(e)}")
+        print(f"Error during synthesis: {str(e)}")
         raise

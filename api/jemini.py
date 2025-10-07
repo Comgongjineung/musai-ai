@@ -10,15 +10,15 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from typing import Literal
 
-# ──────────────── 환경설정 ────────────────
+# 환경설정 
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=api_key)
 
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 app = FastAPI()
 
-# ──────────────── 서양 미술 사조 ────────────────
+# 서양 미술 사조
 KNOWN_STYLES = [
     "고대 미술", "중세 미술", "르네상스", "바로크", "로코코",
     "신고전주의", "낭만주의", "사실주의", "후기 인상주의", "후기인상주의", "신인상주의", "인상주의",
@@ -74,7 +74,7 @@ def determine_style(end_date: int, gemini_style: str) -> str:
     else:
         return "정보 없음"
 
-# ──────────────── 동아시아/아시아 필터 ────────────────
+# 동아시아/아시아 필터 
 def classify_asian_style(style_text: str) -> str:
     style_text = style_text.lower()
 
@@ -112,7 +112,7 @@ def classify_asian_style(style_text: str) -> str:
     
     return "정보 없음"
 
-# ──────────────── 핵심 로직 함수 ────────────────
+# 핵심 로직 함수
 def get_artwork_title_from_bytes(
     image_bytes: bytes,
     best_guess: str = "",
@@ -194,7 +194,7 @@ def get_artwork_title_from_bytes(
 
         gemini_style = _extract_field(result, r"예술사조\s*:\s*(.*)")
 
-        # ──────────────── 스타일/지역 결정 ────────────────
+        # 스타일/지역 결정 
         # 1. KNOWN_STYLES (서양미술) 우선 체크
         if gemini_style in KNOWN_STYLES:
             final_style = gemini_style
@@ -219,7 +219,7 @@ def get_artwork_title_from_bytes(
     except Exception as e:
         return {"error": f"[Gemini 오류]: {e}"}
 
-# ──────────────── 유틸 ────────────────
+# 유틸 
 def _extract_field(text: str, pattern: str) -> str:
     match = re.search(pattern, text)
     return match.group(1).strip() if match else "정보 없음"
@@ -228,7 +228,7 @@ def _extract_description(text: str) -> str:
     match = re.search(r"작품\s*해설\s*:\s*(.*)", text, re.DOTALL)
     return match.group(1).strip() if match else "설명 없음"
 
-# ──────────────── Swagger 테스트용 API ────────────────
+# Swagger 테스트용 API
 @app.post("/generate-artwork-description/")
 async def generate_artwork_description(
     file: UploadFile = File(...),

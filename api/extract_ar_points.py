@@ -11,7 +11,7 @@ if client.api_key is None:
 def _to_data_url(img: bytes) -> str:
     return "data:image/jpeg;base64," + base64.b64encode(img).decode()
 
-# ───────────────────────── 1단계: 숨은 이야기·상징 요약 ─────────────────────────
+# 1단계: 숨은 이야기·상징 요약
 def _summarize(img_url: str) -> dict:
     prompt = (
         'Return ONLY JSON: {"story":"...", "symbols":["..."]} . '
@@ -30,7 +30,7 @@ def _summarize(img_url: str) -> dict:
     )
     return json.loads(res.choices[0].message.content)
 
-# ───────────────────────── 2단계: 좌표·설명 추출 ─────────────────────────
+# 2단계: 좌표·설명 추출
 def _points(img_url: str, ctx: dict, max_pts=4) -> List[Dict]:
     story   = ctx.get("story", "")
     symbols = ", ".join(ctx.get("symbols", []))
@@ -61,13 +61,13 @@ def _points(img_url: str, ctx: dict, max_pts=4) -> List[Dict]:
         p["description"] = str(p.get("description", ""))[:150]
     return pts
 
-# ───────────────────────── 외부 호출 함수 ─────────────────────────
+# 외부 호출 함수
 def extract_points(img_bytes: bytes, max_points: int = 4) -> List[Dict]:
     url   = _to_data_url(img_bytes)
     ctx   = _summarize(url)          # 숨은 이야기·상징 추출
     return _points(url, ctx, max_points)
 
-# ───────────────────────── CLI 테스트 ─────────────────────────
+# CLI 테스트
 if __name__ == "__main__":
     import sys, pathlib, pprint
     with pathlib.Path(sys.argv[1]).open("rb") as f:
