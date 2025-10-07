@@ -21,15 +21,15 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/ec2-user/musai-ai
+
             git fetch origin
             git checkout main
             git pull origin main
 
-            docker stop musai-ai || true
-            docker rm musai-ai || true
-            docker rmi musai-ai || true
+            docker ps -a -q --filter "name=musai-ai" | xargs -r docker rm -f
+            docker rmi -f musai-ai || true
 
-            docker build -t musai-ai .
+            docker build --no-cache -t musai-ai .
 
             docker run -d \
               --name musai-ai \
@@ -37,5 +37,5 @@ jobs:
               -p 8000:8000 \
               -v /home/ec2-user/musai-ai/service_account.json:/app/service_account.json:ro \
               -e GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json \
+              -e GEMINI_MODEL_NAME=gemini-2.5 \
               musai-ai
-
