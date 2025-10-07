@@ -31,7 +31,7 @@ jobs:
 
             docker build --no-cache -t musai-ai .
 
-            docker run -d --rm \
+            docker run -d \
               --name musai-ai \
               --network musai-network \
               -p 8000:8000 \
