@@ -1,15 +1,15 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
-from api.vision import get_best_guess_label, get_original_image_url
 from api.jemini import get_artwork_title_from_bytes
+from api.vision import get_image_analysis
 
 router = APIRouter()
 
 @router.post("/")
 async def web_detection(
     file: UploadFile = File(...),
-    level: str = Form("중"),  # ✅ level 폼 추가
-    best_guess: str = Form("")  # ✅ best_guess 폼도 수동 입력 허용
+    level: str = Form("중"),
+    best_guess: str = Form("")
 ):
     try:
         if not file:
@@ -17,10 +17,14 @@ async def web_detection(
 
         image_data = await file.read()
 
-        # 사용자가 best_guess를 직접 안 넣었으면 Vision API 결과 넣음
-        label = best_guess or get_best_guess_label(image_data)
+        # Vision API 1회 호출
+        image_url, api_best_guess, title_candidate = get_image_analysis(image_data)
+
+        # label 결정: 사용자 입력 > Vision API title 후보 > Vision API best_guess
+        label = best_guess or title_candidate or api_best_guess
+
+        # Gemini로 작품 해설 생성
         gemini_result = get_artwork_title_from_bytes(image_data, best_guess=label, level=level)
-        image_url = get_original_image_url(image_data)
 
         return {
             "vision_result": label if label else "작품 인식 실패",
